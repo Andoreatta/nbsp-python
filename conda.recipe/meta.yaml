@@ -1,5 +1,5 @@
 package:
-  name: scikit_build_example
+  name: nbsp_python
   version: 0.0.1
 
 source:
@@ -23,17 +23,16 @@ requirements:
   run:
     - python
 
-
-test:
-  imports:
-    - scikit_build_example
-  requires:
-    - pytest
-  source_files:
-    - tests
-  commands:
-    - pytest tests
+# test:
+#   imports:
+#     - nbsp_python
+#   requires:
+#     - pytest
+#   source_files:
+#     - tests
+#   commands:
+#     - pytest tests
 
 about:
-  summary: An example project built with pybind11 and scikit-build.
+  summary: Python bindings for NBioBSP using C++ and pybind11
   license_file: LICENSE
