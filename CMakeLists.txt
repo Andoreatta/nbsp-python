@@ -8,7 +8,7 @@ project(
 # TODO: add linux support and env vars
 set(pybind11_DIR "C:/Users/William/scoop/apps/python/current/Lib/site-packages/pybind11/share/cmake/pybind11")
 link_directories("C:/Program Files (x86)/NITGEN/eNBSP SDK Professional/SDK/lib/x64")
-include_directories("/include")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
