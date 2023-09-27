@@ -118,15 +118,14 @@ void NBioBSP_CloseDevice(){
     std::cout << "NBioAPI_CloseDevice Success" << std::endl;
 }
 
-void NBioBSP_Capture(){
-    purpose = NBioAPI_FIR_PURPOSE_VERIFY;
-    nbioApiReturn = NBioAPI_Capture(nbioApiHandle, purpose, &hCapturedFIR, 10000, NULL, NULL);
+// To do: implement handle different purposes
+void NBioBSP_Capture(NBioAPI_FIR_PURPOSE purpose, int timeout){
+    nbioApiReturn = NBioAPI_Capture(nbioApiHandle, purpose, &hCapturedFIR, timeout, NULL, NULL);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         std::cout << "NBioAPI_Capture failed" << std::endl;
         std::cout << "NBioAPI_Capture Error: " << nbioApiReturn << std::endl;
         return;
     }
-    std::cout << "NBioAPI_Capture Success" << std::endl;
 }
 
 PYBIND11_MODULE(_core, module) {

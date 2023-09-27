@@ -1,17 +1,18 @@
 # NBioBSP for Python
+### Do not use this module in production, theres no release yet.
 This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.  
 **Works only on Windows at the moment.**
 
 ## Requirements
 - Python 3.10 or higher 
-- eNBSP SDK greater than or equal to 4.8.9
+- eNBSP SDK greater or equal to 4.8.9
 - MSVC 2019 or higher
 
-## TO DO:
+## To Do:
 - [ ] Readable error output
+- [ ] Handle fingerprint purposes on capture properly
 - [ ] Implement all functions that are possible in Windows
-- [ ] Implement all functions that are *possible* in Linux **(no priority)** 
-
+- [ ] Implement all functions that are *possible* in Linux **(no priority)**
 You can test the module with the following code:
 ```python
 import nbsp_python as nbsp
