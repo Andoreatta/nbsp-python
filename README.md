@@ -9,10 +9,14 @@ This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.
 - MSVC 2019 or higher
 
 ## To Do:
-- [ ] Readable error output
+- [ ] Readable error output using with NBioAPI types **(priority)**
+- [ ] Handle errors properly
+    - [ ] Throw translatable and proper exceptions from C++ to Python
+- [ ] Handle return values properly **(priority)**
 - [ ] Handle fingerprint purposes on capture properly
 - [ ] Implement all functions that are possible in Windows
 - [ ] Implement all functions that are *possible* in Linux **(no priority)**
+
 You can test the module with the following code:
 ```python
 import nbsp_python as nbsp
