@@ -130,26 +130,55 @@ void NBioBSP_CloseDevice(){
     std::cout << "NBioAPI_CloseDevice Success" << std::endl;
 }
 
-// To do: implement handle different purposes
-std::string NBioBSP_Capture(std::string purpose, int timeout){
+NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
     if (purposeMap.find(purpose) == purposeMap.end()) {
         std::cout << "Invalid purpose" << std::endl;
         std::cout << "Valid purposes: verify, identify, enroll, enroll_for_verification, enroll_for_identification" << std::endl;
-        // returns empty string, workaround which i'll fix later
-        return "";
+        // returns 1, workaround which i'll fix later
+        return 1;
     }
 
     nbioApiReturn = NBioAPI_Capture(nbioApiHandle, purposeMap[purpose], &hCapturedFIR, timeout, NULL, NULL);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        return "NBioAPI_Capture failed, ERROR: " + std::to_string(nbioApiReturn);
+        std::cout << "NBioAPI_Capture ERROR: " << nbioApiReturn << std::endl;
+        return nbioApiReturn;
     }
+    std::cout << "NBioAPI_Capture Success" << std::endl;
 
+    return nbioApiHandle;
+}
+
+NBioAPI_FIR_TEXTENCODE NBioBSP_GetTextFIRFromHandle(NBioAPI_HANDLE nbioApiHandle){
     nbioApiReturn = NBioAPI_GetTextFIRFromHandle(nbioApiHandle, hCapturedFIR, &textFIR, NBioAPI_FALSE);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        return "NBioAPI_GetTextFIRFromHandle failed, ERROR: " + std::to_string(nbioApiReturn);
+        std::cout << "NBioAPI_GetTextFIRFromHandle ERROR: " << nbioApiReturn << std::endl;
+        // empty textFIR
+        return textFIR;
     }
 
-    return textFIR.TextFIR;
+    return textFIR;
+}
+
+bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
+    NBioAPI_FIR_TEXTENCODE extracted_fir = NBioBSP_GetTextFIRFromHandle(nbioApiHandle);
+    NBioAPI_INPUT_FIR inputFIR;
+    NBioAPI_BOOL result;
+    inputFIR.Form = NBioAPI_FIR_FORM_TEXTENCODE;
+    inputFIR.InputFIR.TextFIR = &extracted_fir;
+
+    if (nbioApiHandle != NBioAPI_INVALID_HANDLE){
+        nbioApiReturn = NBioAPI_Verify(nbioApiHandle, &inputFIR, &result, NULL, 10000, NULL, NULL);
+        if (nbioApiReturn != NBioAPIERROR_NONE) {
+            std::cout << "NBioAPI_Verify Invalid: " << nbioApiReturn << std::endl;
+            return false;
+        }
+        std::cout << "NBioAPI_Verify result has been generated successfully" << std::endl;
+        return result;
+    } else {
+        std::cout << "Invalid Handle" << std::endl;
+        return false;
+    }
+
 }
 
 PYBIND11_MODULE(_core, module) {
@@ -162,5 +191,6 @@ PYBIND11_MODULE(_core, module) {
     module.def("open_specific_device", &NBioBSP_OpenSpecificDevice, "Open NBioBSP Device with specific ID");
     module.def("close_device", &NBioBSP_CloseDevice, "Close NBioBSP Device");
     module.def("capture", &NBioBSP_Capture, "Capture NBioBSP Device");
-    module.def("verify", &NBioBSP_Capture, "Capture NBioBSP Device for verification");
+    module.def("extract_fir_text", &NBioBSP_GetTextFIRFromHandle, "Extract FIR Text from Handle");
+    module.def("verify", &NBioBSP_Verify, "Capture NBioBSP Device for verification");
 }
