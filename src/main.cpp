@@ -363,7 +363,7 @@ PYBIND11_MODULE(_core, module) {
     module.def("open_device", &NBioBSP_OpenDevice, "Open NBioBSP Device");
     module.def("open_specific_device", &NBioBSP_OpenSpecificDevice, "Open NBioBSP Device with specific ID");
     module.def("close_device", &NBioBSP_CloseDevice, "Close NBioBSP Device");
-    module.def("capture", &NBioBSP_Capture, "Capture NBioBSP Device");
+    module.def("capture", &NBioBSP_Capture, "Capture Fingerprint");
     module.def("extract_fir_text", &NBioBSP_GetTextFIRFromHandle, "Extract FIR Text from Handle");
     module.def("verify", &NBioBSP_Verify, "Fingerprint Verification");
 }
