@@ -288,16 +288,18 @@ void NBioBSP_OpenDevice(){
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
+
     std::cout << "NBioAPI_OpenDevice Success (Device ID): " << nbioApiDeviceId << std::endl;
 }
 
 // pass the device ID (pDeviceInfoEx from NBioBSP_EnumerateDeviceExtra)
-void NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
+NBioAPI_DEVICE_ID NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
     nbioApiReturn = NBioAPI_OpenDevice(nbioApiHandle, nbioApiDeviceId);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
-    std::cout << "NBioAPI_OpenDevice Success (Device ID): " << nbioApiDeviceId << std::endl;
+
+    return nbioApiDeviceId;
 }
 
 // closes all devices
@@ -307,6 +309,7 @@ void NBioBSP_CloseDevice(){
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
+
     std::cout << "NBioAPI_CloseDevice Success" << std::endl;
 }
 
@@ -324,21 +327,23 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
     return nbioApiHandle;
 }
 
-NBioAPI_FIR_TEXTENCODE NBioBSP_GetTextFIRFromHandle(NBioAPI_HANDLE nbioApiHandle){
+std::string NBioBSP_GetTextFIRFromHandle(NBioAPI_HANDLE nbioApiHandle){
     nbioApiReturn = NBioAPI_GetTextFIRFromHandle(nbioApiHandle, hCapturedFIR, &textFIR, NBioAPI_FALSE);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
 
-    return textFIR;
+    return textFIR.TextFIR;
 }
 
 bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
-    NBioAPI_FIR_TEXTENCODE extracted_fir = NBioBSP_GetTextFIRFromHandle(nbioApiHandle);
+    std::string extracted_fir = NBioBSP_GetTextFIRFromHandle(nbioApiHandle);
+    NBioAPI_FIR_TEXTENCODE mouldFirText;
+    mouldFirText.TextFIR = &extracted_fir[0];
     NBioAPI_INPUT_FIR inputFIR;
     NBioAPI_BOOL result;
     inputFIR.Form = NBioAPI_FIR_FORM_TEXTENCODE;
-    inputFIR.InputFIR.TextFIR = &extracted_fir;
+    inputFIR.InputFIR.TextFIR = &mouldFirText;
 
     nbioApiReturn = NBioAPI_Verify(nbioApiHandle, &inputFIR, &result, NULL, 10000, NULL, NULL);
     if (nbioApiReturn != NBioAPIERROR_NONE) {

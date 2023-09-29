@@ -12,7 +12,7 @@ This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.
 - [x] Readable error output using with NBioAPI types **(priority)**
 - [x] Handle errors properly
     - [x] Throw translatable and proper exceptions from C++ to Python
-- [] Handle return values properly **(priority)**
+- [ ] Handle return values properly **(priority)**
 - [ ] Handle fingerprint purposes on capture properly
 - [ ] Implement all functions that are possible in Windows
 - [ ] Implement all functions that are *possible* in Linux **(no priority)**
