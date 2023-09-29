@@ -365,5 +365,5 @@ PYBIND11_MODULE(_core, module) {
     module.def("close_device", &NBioBSP_CloseDevice, "Close NBioBSP Device");
     module.def("capture", &NBioBSP_Capture, "Capture NBioBSP Device");
     module.def("extract_fir_text", &NBioBSP_GetTextFIRFromHandle, "Extract FIR Text from Handle");
-    module.def("verify", &NBioBSP_Verify, "Capture NBioBSP Device for verification");
+    module.def("verify", &NBioBSP_Verify, "Fingerprint Verification");
 }
