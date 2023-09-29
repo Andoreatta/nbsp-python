@@ -231,18 +231,16 @@ std::unordered_map<std::string, NBioAPI_FIR_PURPOSE> purposeMap = {
 bool NBioBSP_Initialize() {
     nbioApiReturn = NBioAPI_Init(&nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_Init failed, ERROR: " << nbioApiReturn << std::endl;
-        return false;
+        throw NBioAPIException(nbioApiReturn);
     }
-    std::cout << "NBioAPI_Init Success (Handle Value): " << nbioApiHandle << std::endl;
+    std::cout << "NBioAPI_Initialize Success" << std::endl;
     return true;
 }
 
 bool NBioBSP_Terminate(){
     nbioApiReturn = NBioAPI_Terminate(nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_Terminate failed, ERROR: " << nbioApiReturn << std::endl;
-        return false;
+        throw NBioAPIException(nbioApiReturn);
     }
     std::cout << "NBioAPI_Terminate Success" << std::endl;
     return true;
@@ -251,50 +249,44 @@ bool NBioBSP_Terminate(){
 std::string NBioBSP_GetVersion() {
     nbioApiReturn = NBioAPI_GetVersion(nbioApiHandle, &version);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        return "NBioAPI_GetVersion failed, ERROR: " + std::to_string(nbioApiReturn);
+        throw NBioAPIException(nbioApiReturn);
     }
     return std::to_string(version.Major) + "." + std::to_string(version.Minor);
 }
 
-// This function is to retrieve detailed information about the devices attached,
-std::vector<std::vector<std::string>> NBioBSP_EnumeratedDeviceExtra() {
+// This function is to retrieve the more detail information about device include number of devices and device IDs attached to the system. <-- from Nitgen's NBioBSP SDK
+std::unordered_map<std::string, std::string> NBioBSP_EnumeratedDeviceExtra() {
     NBioAPI_UINT32 nDeviceNum;
     NBioAPI_DEVICE_ID *pDeviceList;
     NBioAPI_DEVICE_INFO_EX *pDeviceInfoEx;
 
     nbioApiReturn = NBioAPI_EnumerateDeviceEx(nbioApiHandle, &nDeviceNum, &pDeviceList, &pDeviceInfoEx);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_EnumerateDeviceEx failed, ERROR: " << nbioApiReturn << std::endl;
-        return {};
+        throw NBioAPIException(nbioApiReturn);
     }
 
-    std::vector<std::vector<std::string>> deviceList;
+    std::unordered_map<std::string, std::string> deviceMap;
     for (int i = 0; i < nDeviceNum; i++){
-        std::vector<std::string> deviceInfo;
-        deviceInfo.push_back(std::to_string(pDeviceList[i]));
-        deviceInfo.push_back(std::to_string(pDeviceInfoEx[i].NameID));
-        deviceInfo.push_back(std::to_string(pDeviceInfoEx[i].Instance));
-        deviceInfo.push_back(pDeviceInfoEx[i].Name);
-        deviceInfo.push_back(pDeviceInfoEx[i].Description);
-        deviceInfo.push_back(pDeviceInfoEx[i].Dll);
-        deviceInfo.push_back(pDeviceInfoEx[i].Sys);
-        deviceInfo.push_back(std::to_string(pDeviceInfoEx[i].AutoOn));
-        deviceInfo.push_back(std::to_string(pDeviceInfoEx[i].Brightness));
-        deviceInfo.push_back(std::to_string(pDeviceInfoEx[i].Contrast));
-        deviceInfo.push_back(std::to_string(pDeviceInfoEx[i].Gain));
-
-        deviceList.push_back(deviceInfo);
+        deviceMap["Device ID: " + std::to_string(i)] = std::to_string(pDeviceList[i]);
+        deviceMap["Name ID: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].NameID);
+        deviceMap["Instance: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Instance);
+        deviceMap["Name: " + std::to_string(i)] = pDeviceInfoEx[i].Name;
+        deviceMap["Description: " + std::to_string(i)] = pDeviceInfoEx[i].Description;
+        deviceMap["Dll: " + std::to_string(i)] = pDeviceInfoEx[i].Dll;
+        deviceMap["Sys: " + std::to_string(i)] = pDeviceInfoEx[i].Sys;
+        deviceMap["AutoOn: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].AutoOn);
+        deviceMap["Brightness: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Brightness);
+        deviceMap["Contrast: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Contrast);
+        deviceMap["Gain: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Gain);
     }
-    return deviceList;
+    return deviceMap;
 }
 
 void NBioBSP_OpenDevice(){
     nbioApiDeviceId = NBioAPI_DEVICE_ID_AUTO;
     nbioApiReturn = NBioAPI_OpenDevice(nbioApiHandle, nbioApiDeviceId);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_OpenDevice failed" << std::endl;
-        std::cout << "NBioAPI_OpenDevice ERROR: " << nbioApiReturn << std::endl;
-        return;
+        throw NBioAPIException(nbioApiReturn);
     }
     std::cout << "NBioAPI_OpenDevice Success (Device ID): " << nbioApiDeviceId << std::endl;
 }
@@ -303,9 +295,7 @@ void NBioBSP_OpenDevice(){
 void NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
     nbioApiReturn = NBioAPI_OpenDevice(nbioApiHandle, nbioApiDeviceId);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_OpenDevice failed" << std::endl;
-        std::cout << "NBioAPI_OpenDevice ERROR: " << nbioApiReturn << std::endl;
-        return;
+        throw NBioAPIException(nbioApiReturn);
     }
     std::cout << "NBioAPI_OpenDevice Success (Device ID): " << nbioApiDeviceId << std::endl;
 }
@@ -315,25 +305,19 @@ void NBioBSP_CloseDevice(){
     nbioApiDeviceId = NBioAPI_DEVICE_ID_AUTO;       // detects which devices to close
     nbioApiReturn = NBioAPI_CloseDevice(nbioApiHandle, nbioApiDeviceId);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_CloseDevice failed" << std::endl;
-        std::cout << "NBioAPI_CloseDevice ERROR: " << nbioApiReturn << std::endl;
-        return;
+        throw NBioAPIException(nbioApiReturn);
     }
     std::cout << "NBioAPI_CloseDevice Success" << std::endl;
 }
 
 NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
     if (purposeMap.find(purpose) == purposeMap.end()) {
-        std::cout << "Invalid purpose" << std::endl;
-        std::cout << "Valid purposes: verify, identify, enroll, enroll_for_verification, enroll_for_identification" << std::endl;
-        // returns 1, workaround which i'll fix later
-        return 1;
+        throw std::invalid_argument("Invalid purpose");
     }
 
     nbioApiReturn = NBioAPI_Capture(nbioApiHandle, purposeMap[purpose], &hCapturedFIR, timeout, NULL, NULL);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_Capture ERROR: " << nbioApiReturn << std::endl;
-        return nbioApiReturn;
+        throw NBioAPIException(nbioApiReturn);
     }
     std::cout << "NBioAPI_Capture Success" << std::endl;
 
@@ -343,9 +327,7 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
 NBioAPI_FIR_TEXTENCODE NBioBSP_GetTextFIRFromHandle(NBioAPI_HANDLE nbioApiHandle){
     nbioApiReturn = NBioAPI_GetTextFIRFromHandle(nbioApiHandle, hCapturedFIR, &textFIR, NBioAPI_FALSE);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "NBioAPI_GetTextFIRFromHandle ERROR: " << nbioApiReturn << std::endl;
-        // empty textFIR
-        return textFIR;
+        throw NBioAPIException(nbioApiReturn);
     }
 
     return textFIR;
@@ -358,19 +340,13 @@ bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
     inputFIR.Form = NBioAPI_FIR_FORM_TEXTENCODE;
     inputFIR.InputFIR.TextFIR = &extracted_fir;
 
-    if (nbioApiHandle != NBioAPI_INVALID_HANDLE){
-        nbioApiReturn = NBioAPI_Verify(nbioApiHandle, &inputFIR, &result, NULL, 10000, NULL, NULL);
-        if (nbioApiReturn != NBioAPIERROR_NONE) {
-            std::cout << "NBioAPI_Verify Invalid: " << nbioApiReturn << std::endl;
-            return false;
-        }
-        std::cout << "NBioAPI_Verify result has been generated successfully" << std::endl;
-        return result;
-    } else {
-        std::cout << "Invalid Handle" << std::endl;
-        return false;
+    nbioApiReturn = NBioAPI_Verify(nbioApiHandle, &inputFIR, &result, NULL, 10000, NULL, NULL);
+    if (nbioApiReturn != NBioAPIERROR_NONE) {
+        std::cout << "Timeout achieved, Verification has not been completed" << std::endl;
+        throw NBioAPIException(nbioApiReturn);
     }
 
+    return result;
 }
 
 PYBIND11_MODULE(_core, module) {
