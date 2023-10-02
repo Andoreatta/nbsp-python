@@ -31,7 +31,7 @@ public:
         case NBioAPIERROR_INVALID_HANDLE:
             return "Invalid handle";
         case NBioAPIERROR_INVALID_POINTER:
-            return "Invalid pointer";
+            return "Invalid pointer. Maybe there's no fingerprint registered on your handle.";
         case NBioAPIERROR_INVALID_TYPE:
             return "Invalid type";
         case NBioAPIERROR_FUNCTION_FAIL:
@@ -297,13 +297,13 @@ void NBioBSP_OpenDevice(){
 }
 
 // pass the device ID (pDeviceInfoEx from NBioBSP_EnumerateDeviceExtra)
-NBioAPI_DEVICE_ID NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
+bool NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
     nbioApiReturn = NBioAPI_OpenDevice(nbioApiHandle, nbioApiDeviceId);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
 
-    return nbioApiDeviceId;
+    return true;
 }
 
 // closes all devices
