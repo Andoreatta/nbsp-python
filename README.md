@@ -34,7 +34,15 @@ fingerprint_hash = nbsp.extract_fir_text(handle)
 nbsp.terminate()
 ```
 
------------------
+## Installation
+
+```python
+git clone https://github.com/Andoreatta/nbsp-python.git
+cd nbsp-python
+pip install .
+```
+Pulls all the dependencies and installs the module, if something happens, check if the dependencies in pyproject.toml are installed correctly.
+
 
 ## Usage 
 
