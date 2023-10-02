@@ -1,5 +1,5 @@
 # NBioBSP for Python
-### Do not use this module in production, theres no release yet.
+### Beta module for integrating NBioBSP SDK with Python
 This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.  
 **Works only on Windows at the moment.**  
 
