@@ -1,5 +1,5 @@
 // THIS CODE FOLLOWS NITGEN'S NBioBSP SDK OLD STANDARD
-// so dont judge me
+// so dont judge me, exceptions in C++ are problematic, but because of pybind11, I've used it.
 // C++11
 #include <iostream>
 #include <unordered_map>
@@ -228,6 +228,10 @@ std::unordered_map<std::string, NBioAPI_FIR_PURPOSE> purposeMap = {
     // {"update", NBioAPI_FIR_PURPOSE_UPDATE}
 };
 
+
+// ---------------------------------- FUNCTIONS ---------------------------------- //
+
+
 bool NBioBSP_Initialize() {
     nbioApiReturn = NBioAPI_Init(&nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
@@ -255,7 +259,7 @@ std::string NBioBSP_GetVersion() {
 }
 
 // This function is to retrieve the more detail information about device include number of devices and device IDs attached to the system. <-- from Nitgen's NBioBSP SDK
-std::unordered_map<std::string, std::string> NBioBSP_EnumeratedDeviceExtra() {
+std::vector<std::unordered_map<std::string, std::string>> NBioBSP_EnumeratedDeviceExtra() {
     NBioAPI_UINT32 nDeviceNum;
     NBioAPI_DEVICE_ID *pDeviceList;
     NBioAPI_DEVICE_INFO_EX *pDeviceInfoEx;
@@ -265,21 +269,21 @@ std::unordered_map<std::string, std::string> NBioBSP_EnumeratedDeviceExtra() {
         throw NBioAPIException(nbioApiReturn);
     }
 
-    std::unordered_map<std::string, std::string> deviceMap;
-    for (int i = 0; i < nDeviceNum; i++){
-        deviceMap["Device ID: " + std::to_string(i)] = std::to_string(pDeviceList[i]);
-        deviceMap["Name ID: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].NameID);
-        deviceMap["Instance: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Instance);
-        deviceMap["Name: " + std::to_string(i)] = pDeviceInfoEx[i].Name;
-        deviceMap["Description: " + std::to_string(i)] = pDeviceInfoEx[i].Description;
-        deviceMap["Dll: " + std::to_string(i)] = pDeviceInfoEx[i].Dll;
-        deviceMap["Sys: " + std::to_string(i)] = pDeviceInfoEx[i].Sys;
-        deviceMap["AutoOn: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].AutoOn);
-        deviceMap["Brightness: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Brightness);
-        deviceMap["Contrast: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Contrast);
-        deviceMap["Gain: " + std::to_string(i)] = std::to_string(pDeviceInfoEx[i].Gain);
+    std::vector<std::unordered_map<std::string, std::string>> deviceList(nDeviceNum);
+    for (int i = 0; i < nDeviceNum; i++) {
+        deviceList[i]["Device ID"] = std::to_string(pDeviceList[i]);
+        deviceList[i]["Name ID"] = std::to_string(pDeviceInfoEx[i].NameID);
+        deviceList[i]["Instance"] = std::to_string(pDeviceInfoEx[i].Instance);
+        deviceList[i]["Name"] = pDeviceInfoEx[i].Name;
+        deviceList[i]["Description"] = pDeviceInfoEx[i].Description;
+        deviceList[i]["Dll"] = pDeviceInfoEx[i].Dll;
+        deviceList[i]["Sys"] = pDeviceInfoEx[i].Sys;
+        deviceList[i]["AutoOn"] = std::to_string(pDeviceInfoEx[i].AutoOn);
+        deviceList[i]["Brightness"] = std::to_string(pDeviceInfoEx[i].Brightness);
+        deviceList[i]["Contrast"] = std::to_string(pDeviceInfoEx[i].Contrast);
+        deviceList[i]["Gain"] = std::to_string(pDeviceInfoEx[i].Gain);
     }
-    return deviceMap;
+    return deviceList;
 }
 
 void NBioBSP_OpenDevice(){
@@ -322,8 +326,8 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
+    
     std::cout << "NBioAPI_Capture Success" << std::endl;
-
     return nbioApiHandle;
 }
 
