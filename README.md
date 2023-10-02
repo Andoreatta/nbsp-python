@@ -5,7 +5,7 @@ This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.
 **All code is self contained into a single file, as it is just bindings.**
 ## Requirements
 - Python 3.10 or higher 
-- eNBSP SDK greater or equal to 4.8.9
+- eNBSP SDK greater or equal to 5.2
 - MSVC 2019 or higher
 
 ## To Do:

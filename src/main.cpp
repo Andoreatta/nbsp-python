@@ -1,6 +1,6 @@
 // THIS CODE FOLLOWS NITGEN'S NBioBSP SDK OLD STANDARD
 // so dont judge me, exceptions in C++ are problematic, but because of pybind11, I've used it.
-// C++11
+// all code is in a single file as it is just a wrapper for the NBioBSP SDK, so it is easier to maintain and faster to understand the code flow
 #include <iostream>
 #include <unordered_map>
 #include <exception>
@@ -8,6 +8,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <NBioAPI.h>
+#include <NBioAPI_IndexSearch.h>
 
 namespace py = pybind11;
 
