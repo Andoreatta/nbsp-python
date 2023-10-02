@@ -22,7 +22,7 @@ NBioAPI_FIR_PURPOSE purpose;
 NBioAPI_FIR_HANDLE hCapturedFIR;
 NBioAPI_FIR_TEXTENCODE textFIR;
 
-// custom exception handler class
+// custom exception handler class, will be thrown in python
 class NBioAPIException : public std::exception {
 public:
     NBioAPIException(NBioAPI_RETURN errCode) : errorCode(errCode) {}
@@ -233,13 +233,13 @@ std::unordered_map<std::string, NBioAPI_FIR_PURPOSE> purposeMap = {
 // ---------------------------------- FUNCTIONS ---------------------------------- //
 
 
-bool NBioBSP_Initialize() {
+NBioAPI_HANDLE NBioBSP_Initialize() {
     nbioApiReturn = NBioAPI_Init(&nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
-    std::cout << "NBioAPI_Initialize Success" << std::endl;
-    return true;
+
+    return nbioApiHandle;
 }
 
 bool NBioBSP_Terminate(){
@@ -247,7 +247,6 @@ bool NBioBSP_Terminate(){
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
-    std::cout << "NBioAPI_Terminate Success" << std::endl;
     return true;
 }
 
@@ -328,7 +327,6 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
         throw NBioAPIException(nbioApiReturn);
     }
     
-    std::cout << "NBioAPI_Capture Success" << std::endl;
     return nbioApiHandle;
 }
 
@@ -360,7 +358,7 @@ bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
 }
 
 PYBIND11_MODULE(_core, module) {
-    module.doc() = "Python binding for NBioBSP";
+    module.doc() = "Python bindings for NBioBSP";
     module.def("initialize", &NBioBSP_Initialize, "Initialize NBioBSP");
     module.def("terminate", &NBioBSP_Terminate, "Terminate NBioBSP");
     module.def("get_version", &NBioBSP_GetVersion, "Get NBioBSP Version");
