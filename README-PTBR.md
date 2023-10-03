@@ -61,18 +61,18 @@ nbsp.terminate()
     Fecha o dispositivo.
 
 
-- `nbsp.capture(purpose, timeout)`  
+- `nbsp.capture("purpose", timeout)`  
     Captura uma impressão digital. Retorna o identificador da impressão digital.
     `purpose` pode ser um dos seguintes:
-    - `enroll`  
+    - `"enroll"`  
         para registrar uma impressão digital
-    - `verify`  
+    - `"verify"`  
         para verificar uma impressão digital
-    - `identify`  
+    - `"identify"`  
         para identificar uma impressão digital
-    - `enroll_for_verification`  
+    - `"enroll_for_verification"`  
         para registrar uma impressão digital para verificação
-    - `enroll_for_identification`  
+    - `"enroll_for_identification"`  
         para registrar uma impressão digital para identificação
 
 - `nbsp.verify(handle)`  

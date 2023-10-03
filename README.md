@@ -71,18 +71,18 @@ Pulls all the dependencies and installs the module, if something happens, check 
     Closes the device.
 
 
-- `nbsp.capture(purpose, timeout)`  
+- `nbsp.capture("purpose", timeout)`  
     Captures a fingerprint. Returns the handle of the fingerprint.  
     `purpose` can be one of the following:  
-    - `enroll`  
+    - `"enroll"`  
         for registering a fingerprint
-    - `verify`  
+    - `"verify"`  
         for verifying a fingerprint
-    - `identify`  
+    - `"identify"`  
         for identifying a fingerprint (deprecated as of 5.2)
-    - `enroll_for_verification`  
+    - `"enroll_for_verification"`  
         for registering a fingerprint for verification
-    - `enroll_for_identification`  
+    - `"enroll_for_identification"`  
         for registering a fingerprint for identification
 
 - `nbsp.verify(handle)`  

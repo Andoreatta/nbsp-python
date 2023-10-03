@@ -247,6 +247,7 @@ bool NBioBSP_Terminate(){
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
+
     return true;
 }
 
@@ -255,6 +256,7 @@ std::string NBioBSP_GetVersion() {
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
+
     return std::to_string(version.Major) + "." + std::to_string(version.Minor);
 }
 
@@ -283,6 +285,7 @@ std::vector<std::unordered_map<std::string, std::string>> NBioBSP_EnumeratedDevi
         deviceList[i]["Contrast"] = std::to_string(pDeviceInfoEx[i].Contrast);
         deviceList[i]["Gain"] = std::to_string(pDeviceInfoEx[i].Gain);
     }
+
     return deviceList;
 }
 
@@ -326,7 +329,7 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
-    
+
     return nbioApiHandle;
 }
 
@@ -357,6 +360,50 @@ bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
     return result;
 }
 
+bool NBioBSP_InitIndexSearchEngine(NBioAPI_HANDLE nbioApiHandle){
+    nbioApiReturn = NBioAPI_InitIndexSearchEngine(nbioApiHandle);
+    if (nbioApiReturn != NBioAPIERROR_NONE) {
+        throw NBioAPIException(nbioApiReturn);
+    }
+
+    return true;
+}
+
+bool NBioBSP_TerminateIndexSearchEngine(NBioAPI_HANDLE nbioApiHandle){
+    nbioApiReturn = NBioAPI_TerminateIndexSearchEngine(nbioApiHandle);
+    if (nbioApiReturn != NBioAPIERROR_NONE) {
+        throw NBioAPIException(nbioApiReturn);
+    }
+
+    return true;
+}
+
+bool NBioBSP_AddFIRToIndexSearchDB(std::string firText, NBioAPI_UINT32 userId){
+    NBioAPI_INDEXSEARCH_SAMPLE_INFO sampleInfo;
+    NBioAPI_FIR_TEXTENCODE mouldFirText;
+    mouldFirText.TextFIR = &firText[0];
+    NBioAPI_INPUT_FIR inputFIR;
+    inputFIR.Form = NBioAPI_FIR_FORM_TEXTENCODE;
+    inputFIR.InputFIR.TextFIR = &mouldFirText;
+
+    nbioApiReturn = NBioAPI_AddFIRToIndexSearchDB(nbioApiHandle, &inputFIR, userId, &sampleInfo);
+    if (nbioApiReturn != NBioAPIERROR_NONE) {
+        throw NBioAPIException(nbioApiReturn);
+    }
+
+    return true;
+}
+
+NBioAPI_UINT32 NBioBSP_GetDataCountFromIndexSearchDB (NBioAPI_HANDLE nbioApiHandle){
+    NBioAPI_UINT32 dataCount;
+    nbioApiReturn = NBioAPI_GetDataCountFromIndexSearchDB(nbioApiHandle, &dataCount);
+    if (nbioApiReturn != NBioAPIERROR_NONE) {
+        throw NBioAPIException(nbioApiReturn);
+    }
+
+    return dataCount;
+}
+
 PYBIND11_MODULE(_core, module) {
     module.doc() = "Python bindings for NBioBSP";
     module.def("initialize", &NBioBSP_Initialize, "Initialize NBioBSP");
@@ -369,4 +416,9 @@ PYBIND11_MODULE(_core, module) {
     module.def("capture", &NBioBSP_Capture, "Capture Fingerprint");
     module.def("extract_fir_text", &NBioBSP_GetTextFIRFromHandle, "Extract FIR Text from Handle");
     module.def("verify", &NBioBSP_Verify, "Fingerprint Verification");
+
+    module.def("init_index_search", &NBioBSP_InitIndexSearchEngine, "Initialize Index Search Engine");
+    module.def("terminate_index_search", &NBioBSP_TerminateIndexSearchEngine, "Terminate Index Search Engine");
+    module.def("add_fir_to_index_search", &NBioBSP_AddFIRToIndexSearchDB, "Add FIR to Index Search Database");
+    module.def("data_count_from_index_search", &NBioBSP_GetDataCountFromIndexSearchDB, "Data Count from Index Search Database");
 }
