@@ -1,14 +1,14 @@
 # NBioBSP for Python
 ### Beta module for integrating NBioBSP SDK with Python
-This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.  
-**Works only on Windows at the moment.**  
+This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.
+**Works only on Windows at the moment.**
 
 **All code is self contained into a single file, as it is just bindings.**
 
 ### - [Documento em Português](README-PTBR.md)
 
 ## Requirements
-- Python 3.10 or higher 
+- Python 3.10 or higher
 - eNBSP SDK greater or equal to 5.2
 - MSVC 2019 or higher (maybe it works with another compiler, didn't test it yet)
 
@@ -18,22 +18,52 @@ This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.
     - [x] Throw translatable and proper exceptions from C++ to Python
 - [x] Handle return values properly **(priority)**
 - [x] Handle fingerprint purposes on capture properly
-- [ ] Implement IndexSearch methods
+- [x] Implement IndexSearch methods
 - [ ] Implement all functions that are possible in Windows
 - [ ] Implement all functions that are *possible* in Linux **(no priority)**
 
-You can test the module with the following code:
+You can test the module with the following code on the Python interpreter:
 ```python
 import nbsp_python as nbsp
 
-nbsp.initialize()
+# Initialize the NBioBSP instance
+nbsp.initialize_handle()
+
+# Get the version of the NBioBSP SDK
 nbsp.get_version()
+
+# Enumerate the devices connected to the computer
 nbsp.enumerate_device()
+
+# Open the device using auto-detection
 nbsp.open_device()
-enrolled_handle = nbsp.capture("enroll", 10000)
-nbsp.verify(enrolled_handle)
+
+# Capture a fingerprint and assign it to handle
+handle = nbsp.capture("enroll", 10000)
+
+# Verify fingerprints contained in handle
+nbsp.verify(handle)
+
+# Extract the hash from the last fingerprint added in the handle
 fingerprint_hash = nbsp.extract_fir_text(handle)
-nbsp.terminate()
+
+# Initialize the index search
+nbsp.init_index_search()
+
+# Add the fingerprint to the index search and pass
+nbsp.add_fir_to_index_search(fingerprint_hash, 1)
+
+# Identify the fingerprint in the index search
+nbsp.identify_data_from_index_search(fingerprint_hash)
+
+# Terminate the index search
+nbsp.terminate_index_search()
+
+# Terminate the NBioBSP instance
+nbsp.terminate_handle()
+
+# Close the device
+nbsp.close_device()
 ```
 
 ## Installation
@@ -46,47 +76,57 @@ pip install .
 Pulls all the dependencies and installs the module, if something happens, check if the dependencies in pyproject.toml are installed correctly.
 
 
-## Usage 
+## Usage
 
-- `nbsp.initialize()`  
-    Initializes the NBioBSP instance. Must be called before any other function that **interacts with the device**.  
-    So you can call `get_version()` before `initialize()`, but not `capture()`. Returns a handle just in case.
+- `nbsp.initialize_handle()`
+    Initializes the NBioBSP instance. Must be called before any other function that **interacts with the device**.
+    So you can call `get_version()` before `initialize_handle()`, but not `capture()`. Returns a handle just in case.
 
-- `nbsp.terminate()`  
+- `nbsp.terminate_handle()`
     Terminates the NBioBSP instance.
 
-- `nbsp.get_version()`  
+- `nbsp.get_version()`
     Returns the version of the NBioBSP SDK.
 
-- `nbsp.enumerate_device()`  
+- `nbsp.enumerate_device()`
     Enumerates the devices connected to the computer. Returns a list of devices.
 
-- `nbsp.open_device()`  
+- `nbsp.open_device()`
     Opens the device using auto-detection. Returns the handle of the device.
 
-- `nbsp.open_specific_device(index)`  
+- `nbsp.open_specific_device(index)`
     Opens the device using the device ID. Returns true if successful.
 
-- `nbsp.close_device()`  
+- `nbsp.close_device()`
     Closes the device.
 
 
-- `nbsp.capture("purpose", timeout)`  
-    Captures a fingerprint. Returns the handle of the fingerprint.  
-    `purpose` can be one of the following:  
-    - `"enroll"`  
+- `nbsp.capture("purpose", timeout)`
+    Captures a fingerprint. Returns the handle of the fingerprint.
+    `purpose` can be one of the following:
+    - `"enroll"`
         for registering a fingerprint
-    - `"verify"`  
+    - `"verify"`
         for verifying a fingerprint
-    - `"identify"`  
+    - `"identify"`
         for identifying a fingerprint (deprecated as of 5.2)
-    - `"enroll_for_verification"`  
+    - `"enroll_for_verification"`
         for registering a fingerprint for verification
-    - `"enroll_for_identification"`  
+    - `"enroll_for_identification"`
         for registering a fingerprint for identification
+The `timeout` parameter is the maximum time in milliseconds to wait for a fingerprint to be captured.
 
-- `nbsp.verify(handle)`  
-    Verifies fingerprints contained in handle. Returns true if successful.
+- `nbsp.verify(handle)`
+    Verifies the last fingerprint added in handle. Returns true if successful.
 
-- `nbsp.extract_fir_text(handle)`  
+- `nbsp.extract_fir_text(handle)`
     Extracts the fingerprint hash from the handle. Returns the fingerprint hash.
+
+- `nbsp.init_index_search()`
+    Initializes the index search.
+
+- `nbsp.terminate_index_search()`
+    Terminates the index search.
+
+- `nbsp.add_fir_to_index_search(fingerprint_hash, user_id)`
+    Adds a fingerprint to the index search. Returns true if successful.
