@@ -21,6 +21,7 @@ NBioAPI_VERSION version;
 NBioAPI_FIR_PURPOSE purpose;
 NBioAPI_FIR_HANDLE hCapturedFIR;
 NBioAPI_FIR_TEXTENCODE textFIR;
+bool indexSearchEngineState;
 
 // custom exception handler class, will be thrown in python
 class NBioAPIException : public std::exception {
@@ -29,7 +30,7 @@ public:
     virtual const char* what() const throw() {
         switch (errorCode) {
         case NBioAPIERROR_INVALID_HANDLE:
-            return "Invalid handle";
+            return "Invalid handle. Maybe the handle wasn't initialized.";
         case NBioAPIERROR_INVALID_POINTER:
             return "Invalid pointer. Maybe there's no fingerprint registered on your handle.";
         case NBioAPIERROR_INVALID_TYPE:
@@ -233,7 +234,7 @@ std::unordered_map<std::string, NBioAPI_FIR_PURPOSE> purposeMap = {
 // ---------------------------------- FUNCTIONS ---------------------------------- //
 
 
-void NBioBSP_Initialize() {
+NBioAPI_HANDLE NBioBSP_Initialize() {
     if (nbioApiHandle != NULL) {
         throw std::invalid_argument("NBioBSP is already initialized");
     }
@@ -243,8 +244,8 @@ void NBioBSP_Initialize() {
         throw NBioAPIException(nbioApiReturn);
     }
 
-    std::cout << "Initialization Success\n";
-    return;
+    std::cout << "Initialized the handle successfully\n";
+    return nbioApiHandle;
 }
 
 void NBioBSP_Terminate(){
@@ -258,7 +259,7 @@ void NBioBSP_Terminate(){
     }
 
     nbioApiHandle = NULL;    // overwrite the handle to NULL, as terminate returns something else and I want to follow some sort of standard
-    std::cout << "Termination Success\n";
+    std::cout << "Terminated successfully\n";
     return;
 }
 
@@ -307,17 +308,17 @@ void NBioBSP_OpenDevice(){
         throw NBioAPIException(nbioApiReturn);
     }
 
-    std::cout << "NBioAPI_OpenDevice Success (Device ID): " << nbioApiDeviceId << std::endl;
+    std::cout << "Device Opened Successfully (Device ID): " << nbioApiDeviceId << std::endl;
 }
 
 // pass the device ID (pDeviceInfoEx from NBioBSP_EnumerateDeviceExtra)
-bool NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
+void NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
     nbioApiReturn = NBioAPI_OpenDevice(nbioApiHandle, nbioApiDeviceId);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
 
-    return true;
+    std::cout << "Device Opened Successfully (Device ID): " << nbioApiDeviceId << std::endl;
 }
 
 // closes all devices
@@ -328,9 +329,10 @@ void NBioBSP_CloseDevice(){
         throw NBioAPIException(nbioApiReturn);
     }
 
-    std::cout << "The device has been closed\n";
+    std::cout << "The devices were closed\n";
 }
 
+// captures the fingerprint and stores it in the handle, so it can be used later in other functions
 NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
     if (purposeMap.find(purpose) == purposeMap.end()) {
         throw std::invalid_argument("Invalid purpose");
@@ -341,9 +343,11 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
         throw NBioAPIException(nbioApiReturn);
     }
 
+    std::cout << "Fingerprint captured, stored in handle\n";
     return nbioApiHandle;
 }
 
+// extracts the FIR text from the handle
 std::string NBioBSP_GetTextFIRFromHandle(NBioAPI_HANDLE nbioApiHandle){
     nbioApiReturn = NBioAPI_GetTextFIRFromHandle(nbioApiHandle, hCapturedFIR, &textFIR, NBioAPI_FALSE);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
@@ -353,40 +357,53 @@ std::string NBioBSP_GetTextFIRFromHandle(NBioAPI_HANDLE nbioApiHandle){
     return textFIR.TextFIR;
 }
 
+// Remember, it only verifies the fingerprint against the one that is currently on the handle, which is only the last one captured
 bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
     std::string extracted_fir = NBioBSP_GetTextFIRFromHandle(nbioApiHandle);
+
     NBioAPI_FIR_TEXTENCODE mouldFirText;
     mouldFirText.TextFIR = &extracted_fir[0];
+
     NBioAPI_INPUT_FIR inputFIR;
-    NBioAPI_BOOL result;
     inputFIR.Form = NBioAPI_FIR_FORM_TEXTENCODE;
     inputFIR.InputFIR.TextFIR = &mouldFirText;
 
+    NBioAPI_BOOL result;
+
     nbioApiReturn = NBioAPI_Verify(nbioApiHandle, &inputFIR, &result, NULL, 10000, NULL, NULL);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "Timeout achieved, Verification has not been completed\n";
         throw NBioAPIException(nbioApiReturn);
     }
 
     return result;
 }
 
-bool NBioBSP_InitIndexSearchEngine(NBioAPI_HANDLE nbioApiHandle){
+bool NBioBSP_InitIndexSearchEngine(){
+    if (indexSearchEngineState) {
+        throw std::invalid_argument("Index Search Engine is already initialized");
+    }
+
     nbioApiReturn = NBioAPI_InitIndexSearchEngine(nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
 
+    indexSearchEngineState = true;
     std::cout << "Index Search Engine Initialized\n";
     return true;
 }
 
-bool NBioBSP_TerminateIndexSearchEngine(NBioAPI_HANDLE nbioApiHandle){
+bool NBioBSP_TerminateIndexSearchEngine(){
+    if (!indexSearchEngineState) {
+        throw std::invalid_argument("Index Search Engine is already terminated");
+    }
+
     nbioApiReturn = NBioAPI_TerminateIndexSearchEngine(nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
 
+    indexSearchEngineState = false;
     std::cout << "Index Search Engine Terminated\n";
     return true;
 }
@@ -395,6 +412,7 @@ bool NBioBSP_AddFIRToIndexSearchDB(std::string firText, NBioAPI_UINT32 userId){
     NBioAPI_INDEXSEARCH_SAMPLE_INFO sampleInfo;
     NBioAPI_FIR_TEXTENCODE mouldFirText;
     mouldFirText.TextFIR = &firText[0];
+
     NBioAPI_INPUT_FIR inputFIR;
     inputFIR.Form = NBioAPI_FIR_FORM_TEXTENCODE;
     inputFIR.InputFIR.TextFIR = &mouldFirText;
@@ -404,10 +422,11 @@ bool NBioBSP_AddFIRToIndexSearchDB(std::string firText, NBioAPI_UINT32 userId){
         throw NBioAPIException(nbioApiReturn);
     }
 
+    std::cout << "FIR Added to Index Search Database\n";
     return true;
 }
 
-NBioAPI_UINT32 NBioBSP_GetDataCountFromIndexSearchDB (NBioAPI_HANDLE nbioApiHandle){
+NBioAPI_UINT32 NBioBSP_GetDataCountFromIndexSearchDB(){
     NBioAPI_UINT32 dataCount;
     nbioApiReturn = NBioAPI_GetDataCountFromIndexSearchDB(nbioApiHandle, &dataCount);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
@@ -417,10 +436,28 @@ NBioAPI_UINT32 NBioBSP_GetDataCountFromIndexSearchDB (NBioAPI_HANDLE nbioApiHand
     return dataCount;
 }
 
+uint32_t NBioBSP_IdentifyDataFromIndexSearchDB(std::string firText) {
+    NBioAPI_FIR_TEXTENCODE mouldFirText;
+    mouldFirText.TextFIR = &firText[0];
+
+    NBioAPI_INPUT_FIR inputFIR;
+    inputFIR.Form = NBioAPI_FIR_FORM_TEXTENCODE;
+    inputFIR.InputFIR.TextFIR = &mouldFirText;
+
+    NBioAPI_INDEXSEARCH_FP_INFO fpInfo;
+
+    NBioAPI_RETURN nbioApiReturn = NBioAPI_IdentifyDataFromIndexSearchDB(nbioApiHandle, &inputFIR, 5, &fpInfo, NULL);
+    if (nbioApiReturn != NBioAPIERROR_NONE) {
+        throw NBioAPIException(nbioApiReturn);
+    }
+
+    return fpInfo.ID;
+}
+
 PYBIND11_MODULE(_core, module) {
     module.doc() = "Python bindings for NBioBSP";
-    module.def("initialize", &NBioBSP_Initialize, "Initialize NBioBSP");
-    module.def("terminate", &NBioBSP_Terminate, "Terminate NBioBSP");
+    module.def("initialize_handle", &NBioBSP_Initialize, "Initialize NBioBSP");
+    module.def("terminate_handle", &NBioBSP_Terminate, "Terminate NBioBSP");
     module.def("get_version", &NBioBSP_GetVersion, "Get NBioBSP Version");
     module.def("enumerate_device", &NBioBSP_EnumeratedDeviceExtra, "Enumerate NBioBSP Devices with extra info");
     module.def("open_device", &NBioBSP_OpenDevice, "Open NBioBSP Device");
@@ -434,4 +471,5 @@ PYBIND11_MODULE(_core, module) {
     module.def("terminate_index_search", &NBioBSP_TerminateIndexSearchEngine, "Terminate Index Search Engine");
     module.def("add_fir_to_index_search", &NBioBSP_AddFIRToIndexSearchDB, "Add FIR to Index Search Database");
     module.def("data_count_from_index_search", &NBioBSP_GetDataCountFromIndexSearchDB, "Data Count from Index Search Database");
+    module.def("identify_data_from_index_search", &NBioBSP_IdentifyDataFromIndexSearchDB, "Identify Data from Index Search Database");
 }
