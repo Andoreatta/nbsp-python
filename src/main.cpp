@@ -233,22 +233,33 @@ std::unordered_map<std::string, NBioAPI_FIR_PURPOSE> purposeMap = {
 // ---------------------------------- FUNCTIONS ---------------------------------- //
 
 
-NBioAPI_HANDLE NBioBSP_Initialize() {
+void NBioBSP_Initialize() {
+    if (nbioApiHandle != NULL) {
+        throw std::invalid_argument("NBioBSP is already initialized");
+    }
+
     nbioApiReturn = NBioAPI_Init(&nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
 
-    return nbioApiHandle;
+    std::cout << "Initialization Success\n";
+    return;
 }
 
-bool NBioBSP_Terminate(){
+void NBioBSP_Terminate(){
+    if (nbioApiHandle == NULL) {
+        throw std::invalid_argument("NBioBSP is already terminated");
+    }
+
     nbioApiReturn = NBioAPI_Terminate(nbioApiHandle);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
         throw NBioAPIException(nbioApiReturn);
     }
 
-    return true;
+    nbioApiHandle = NULL;    // overwrite the handle to NULL, as terminate returns something else and I want to follow some sort of standard
+    std::cout << "Termination Success\n";
+    return;
 }
 
 std::string NBioBSP_GetVersion() {
@@ -317,7 +328,7 @@ void NBioBSP_CloseDevice(){
         throw NBioAPIException(nbioApiReturn);
     }
 
-    std::cout << "NBioAPI_CloseDevice Success" << std::endl;
+    std::cout << "The device has been closed\n";
 }
 
 NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
@@ -353,7 +364,7 @@ bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
 
     nbioApiReturn = NBioAPI_Verify(nbioApiHandle, &inputFIR, &result, NULL, 10000, NULL, NULL);
     if (nbioApiReturn != NBioAPIERROR_NONE) {
-        std::cout << "Timeout achieved, Verification has not been completed" << std::endl;
+        std::cout << "Timeout achieved, Verification has not been completed\n";
         throw NBioAPIException(nbioApiReturn);
     }
 
@@ -366,6 +377,7 @@ bool NBioBSP_InitIndexSearchEngine(NBioAPI_HANDLE nbioApiHandle){
         throw NBioAPIException(nbioApiReturn);
     }
 
+    std::cout << "Index Search Engine Initialized\n";
     return true;
 }
 
@@ -375,6 +387,7 @@ bool NBioBSP_TerminateIndexSearchEngine(NBioAPI_HANDLE nbioApiHandle){
         throw NBioAPIException(nbioApiReturn);
     }
 
+    std::cout << "Index Search Engine Terminated\n";
     return true;
 }
 
