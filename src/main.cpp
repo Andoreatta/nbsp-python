@@ -321,6 +321,13 @@ void NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
     std::cout << "Device Opened Successfully (Device ID): " << nbioApiDeviceId << std::endl;
 }
 
+// returns the device ID of the opened device, 0 if no device is opened, 255 if auto
+NBioAPI_DEVICE_ID NBioBSP_GetOpenedDeviceID(){
+    // no exception handling here, as it numbers returned are treated as errors
+    nbioApiReturn = NBioAPI_GetOpenedDeviceID(nbioApiHandle);
+    return nbioApiReturn;
+}
+
 // closes all devices
 void NBioBSP_CloseDevice(){
     nbioApiDeviceId = NBioAPI_DEVICE_ID_AUTO;       // detects which devices to close
@@ -393,6 +400,10 @@ bool NBioBSP_InitIndexSearchEngine(){
     return true;
 }
 
+bool NBioBSP_GetIndexSearchState(){
+    return indexSearchEngineState;
+}
+
 bool NBioBSP_TerminateIndexSearchEngine(){
     if (!indexSearchEngineState) {
         throw std::invalid_argument("Index Search Engine is already terminated");
@@ -462,12 +473,14 @@ PYBIND11_MODULE(_core, module) {
     module.def("enumerate_device", &NBioBSP_EnumeratedDeviceExtra, "Enumerate NBioBSP Devices with extra info");
     module.def("open_device", &NBioBSP_OpenDevice, "Open NBioBSP Device");
     module.def("open_specific_device", &NBioBSP_OpenSpecificDevice, "Open NBioBSP Device with specific ID");
+    module.def("is_device_open", &NBioBSP_GetOpenedDeviceID, "Get NBioBSP Opened Device ID");
     module.def("close_device", &NBioBSP_CloseDevice, "Close NBioBSP Device");
     module.def("capture", &NBioBSP_Capture, "Capture Fingerprint");
     module.def("extract_fir_text", &NBioBSP_GetTextFIRFromHandle, "Extract FIR Text from Handle");
     module.def("verify", &NBioBSP_Verify, "Fingerprint Verification");
 
     module.def("init_index_search", &NBioBSP_InitIndexSearchEngine, "Initialize Index Search Engine");
+    module.def("get_index_search_state", &NBioBSP_GetIndexSearchState, "Get Index Search Engine State");
     module.def("terminate_index_search", &NBioBSP_TerminateIndexSearchEngine, "Terminate Index Search Engine");
     module.def("add_fir_to_index_search", &NBioBSP_AddFIRToIndexSearchDB, "Add FIR to Index Search Database");
     module.def("data_count_from_index_search", &NBioBSP_GetDataCountFromIndexSearchDB, "Data Count from Index Search Database");
