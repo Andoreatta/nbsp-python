@@ -65,6 +65,7 @@ nbsp.terminate_handle()
 # Close the device
 nbsp.close_device()
 ```
+Or by executing a [TKinter Example](example/tkinter_example.py) with Python.
 
 ## Installation
 

@@ -64,7 +64,7 @@ nbsp.terminate_handle()
 # Feche o dispositivo
 nbsp.close_device()
 ```
-
+Ou executando o exemplo em [TKinter](example/tkinter_example.py)
 -----------------
 ## Usage
 
