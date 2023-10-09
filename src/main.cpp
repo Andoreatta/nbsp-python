@@ -231,6 +231,12 @@ std::unordered_map<std::string, NBioAPI_FIR_PURPOSE> purposeMap = {
 };
 
 
+void check_nbioapi_error(NBioAPI_RETURN err) {
+    if (err != NBioAPIERROR_NONE) {
+        throw NBioAPIException(err);
+    }
+}
+
 // ---------------------------------- FUNCTIONS ---------------------------------- //
 
 
@@ -240,9 +246,7 @@ NBioAPI_HANDLE NBioBSP_Initialize() {
     }
 
     nbioApiReturn = NBioAPI_Init(&nbioApiHandle);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     std::cout << "Initialized the handle successfully\n";
     return nbioApiHandle;
@@ -254,9 +258,7 @@ void NBioBSP_Terminate(){
     }
 
     nbioApiReturn = NBioAPI_Terminate(nbioApiHandle);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     nbioApiHandle = NULL;    // overwrite the handle to NULL, as terminate returns something else and I want to follow some sort of standard
     std::cout << "Terminated successfully\n";
@@ -265,9 +267,7 @@ void NBioBSP_Terminate(){
 
 std::string NBioBSP_GetVersion() {
     nbioApiReturn = NBioAPI_GetVersion(nbioApiHandle, &version);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     return std::to_string(version.Major) + "." + std::to_string(version.Minor);
 }
@@ -279,9 +279,7 @@ std::vector<std::unordered_map<std::string, std::string>> NBioBSP_EnumeratedDevi
     NBioAPI_DEVICE_INFO_EX *pDeviceInfoEx;
 
     nbioApiReturn = NBioAPI_EnumerateDeviceEx(nbioApiHandle, &nDeviceNum, &pDeviceList, &pDeviceInfoEx);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     std::vector<std::unordered_map<std::string, std::string>> deviceList(nDeviceNum);
     for (int i = 0; i < nDeviceNum; i++) {
@@ -304,9 +302,7 @@ std::vector<std::unordered_map<std::string, std::string>> NBioBSP_EnumeratedDevi
 void NBioBSP_OpenDevice(){
     nbioApiDeviceId = NBioAPI_DEVICE_ID_AUTO;
     nbioApiReturn = NBioAPI_OpenDevice(nbioApiHandle, nbioApiDeviceId);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     std::cout << "Device Opened Successfully (Device ID): " << nbioApiDeviceId << std::endl;
 }
@@ -314,9 +310,7 @@ void NBioBSP_OpenDevice(){
 // pass the device ID (pDeviceInfoEx from NBioBSP_EnumerateDeviceExtra)
 void NBioBSP_OpenSpecificDevice(NBioAPI_DEVICE_ID nbioApiDeviceId) {
     nbioApiReturn = NBioAPI_OpenDevice(nbioApiHandle, nbioApiDeviceId);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     std::cout << "Device Opened Successfully (Device ID): " << nbioApiDeviceId << std::endl;
 }
@@ -332,9 +326,7 @@ NBioAPI_DEVICE_ID NBioBSP_GetOpenedDeviceID(){
 void NBioBSP_CloseDevice(){
     nbioApiDeviceId = NBioAPI_DEVICE_ID_AUTO;       // detects which devices to close
     nbioApiReturn = NBioAPI_CloseDevice(nbioApiHandle, nbioApiDeviceId);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     std::cout << "The devices were closed\n";
 }
@@ -346,9 +338,7 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
     }
 
     nbioApiReturn = NBioAPI_Capture(nbioApiHandle, purposeMap[purpose], &hCapturedFIR, timeout, NULL, NULL);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     std::cout << "Fingerprint captured, stored in handle\n";
     return nbioApiHandle;
@@ -357,9 +347,7 @@ NBioAPI_HANDLE NBioBSP_Capture(std::string purpose, int timeout){
 // extracts the FIR text from the handle
 std::string NBioBSP_GetTextFIRFromHandle(NBioAPI_HANDLE nbioApiHandle){
     nbioApiReturn = NBioAPI_GetTextFIRFromHandle(nbioApiHandle, hCapturedFIR, &textFIR, NBioAPI_FALSE);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     return textFIR.TextFIR;
 }
@@ -378,9 +366,7 @@ bool NBioBSP_Verify(NBioAPI_HANDLE nbioApiHandle){
     NBioAPI_BOOL result;
 
     nbioApiReturn = NBioAPI_Verify(nbioApiHandle, &inputFIR, &result, NULL, 10000, NULL, NULL);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     return result;
 }
@@ -391,9 +377,7 @@ bool NBioBSP_InitIndexSearchEngine(){
     }
 
     nbioApiReturn = NBioAPI_InitIndexSearchEngine(nbioApiHandle);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     indexSearchEngineState = true;
     std::cout << "Index Search Engine Initialized\n";
@@ -410,9 +394,7 @@ bool NBioBSP_TerminateIndexSearchEngine(){
     }
 
     nbioApiReturn = NBioAPI_TerminateIndexSearchEngine(nbioApiHandle);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     indexSearchEngineState = false;
     std::cout << "Index Search Engine Terminated\n";
@@ -429,9 +411,7 @@ bool NBioBSP_AddFIRToIndexSearchDB(std::string firText, NBioAPI_UINT32 userId){
     inputFIR.InputFIR.TextFIR = &mouldFirText;
 
     nbioApiReturn = NBioAPI_AddFIRToIndexSearchDB(nbioApiHandle, &inputFIR, userId, &sampleInfo);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     std::cout << "FIR Added to Index Search Database\n";
     return true;
@@ -440,9 +420,7 @@ bool NBioBSP_AddFIRToIndexSearchDB(std::string firText, NBioAPI_UINT32 userId){
 NBioAPI_UINT32 NBioBSP_GetDataCountFromIndexSearchDB(){
     NBioAPI_UINT32 dataCount;
     nbioApiReturn = NBioAPI_GetDataCountFromIndexSearchDB(nbioApiHandle, &dataCount);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     return dataCount;
 }
@@ -458,9 +436,7 @@ uint32_t NBioBSP_IdentifyDataFromIndexSearchDB(std::string firText) {
     NBioAPI_INDEXSEARCH_FP_INFO fpInfo;
 
     NBioAPI_RETURN nbioApiReturn = NBioAPI_IdentifyDataFromIndexSearchDB(nbioApiHandle, &inputFIR, 5, &fpInfo, NULL);
-    if (nbioApiReturn != NBioAPIERROR_NONE) {
-        throw NBioAPIException(nbioApiReturn);
-    }
+    check_nbioapi_error(nbioApiReturn);
 
     return fpInfo.ID;
 }
