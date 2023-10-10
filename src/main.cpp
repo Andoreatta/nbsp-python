@@ -262,7 +262,6 @@ void NBioBSP_Terminate(){
 
     nbioApiHandle = NULL;    // overwrite the handle to NULL, as terminate returns something else and I want to follow some sort of standard
     std::cout << "Terminated successfully\n";
-    return;
 }
 
 std::string NBioBSP_GetVersion() {

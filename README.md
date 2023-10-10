@@ -11,6 +11,7 @@ This is a Python module for NBioBSP SDK. Built with C/C++ and pybind11.
 - Python 3.10 or higher
 - eNBSP SDK greater or equal to 5.2
 - MSVC 2019 or higher (maybe it works with another compiler, didn't test it yet)
+- Cmake 20 or higher
 
 ## To Do:
 - [x] Readable error output using NBioAPI types **(priority)**

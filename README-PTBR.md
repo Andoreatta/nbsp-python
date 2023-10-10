@@ -9,6 +9,7 @@ Este é um módulo Python para o SDK NBioBSP. Construído com C/C++ e pybind11.
 - Python 3.10 ou superior
 - eNBSP SDK maior ou igual a 5.2
 - MSVC 2019 ou superior (talvez funcione com outro compilador, ainda não testei)
+- Cmake 20 ou superior
 
 ## A fazer:
 - [x] Saída de erro legível usando tipos NBioAPI **(prioridade)**
@@ -65,6 +66,16 @@ nbsp.terminate_handle()
 nbsp.close_device()
 ```
 Ou executando o exemplo em [TKinter](example/tkinter_example.py)
+
+## Instalação
+
+```python
+git clone https://github.com/Andoreatta/nbsp-python.git
+cd nbsp-python
+pip install .
+```
+Puxa todas as dependências e instala o módulo.
+
 -----------------
 ## Usage
 
