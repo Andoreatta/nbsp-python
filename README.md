@@ -69,14 +69,18 @@ nbsp.close_device()
 Or by executing a [TKinter Example](example/tkinter_example.py) with Python.
 
 ## Installation
-
+This process is valid for those who want to modify the library only.
 ```python
 git clone https://github.com/Andoreatta/nbsp-python.git
 cd nbsp-python
 pip install .
 ```
-Pulls all the dependencies and installs the module, if something happens, check if the dependencies in pyproject.toml are installed correctly.
+Pulls all the dependencies and installs the module, if something happens, check if the dependencies in pyproject.toml are installed correctly.  
+If you wish to get only the precompiled library, do the following.
 
+```python
+pip install nbsp-python
+```
 
 ## Usage
 

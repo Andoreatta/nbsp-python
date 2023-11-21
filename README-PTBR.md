@@ -68,13 +68,16 @@ nbsp.close_device()
 Ou executando o exemplo em [TKinter](example/tkinter_example.py)
 
 ## Instalação
-
+O processo a seguir é valido apenas para modificar o código fonte da biblioteca.
 ```python
 git clone https://github.com/Andoreatta/nbsp-python.git
 cd nbsp-python
 pip install .
 ```
-Puxa todas as dependências e instala o módulo.
+If you wish to get only the precompiled library, do the following.
+```python
+pip install nbsp-python
+```
 
 -----------------
 ## Usage
