@@ -74,7 +74,8 @@ git clone https://github.com/Andoreatta/nbsp-python.git
 cd nbsp-python
 pip install .
 ```
-If you wish to get only the precompiled library, do the following.
+
+Se quer apenas instalar a biblioteca e utilizar em seguida.
 ```python
 pip install nbsp-python
 ```
